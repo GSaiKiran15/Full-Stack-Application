@@ -1,5 +1,11 @@
-export default function ArticlesListPage() {
+import articles from "../article-content";
+import ArticlesList from "../ArticleList";
+
+export default function ArticlesListPage() { 
     return (
-        <h1>This is the Articles List Page!</h1>
+        <>
+        <h1>Articles</h1>
+        <ArticlesList articles={articles}/>
+        </>
     );
-}
+ }
