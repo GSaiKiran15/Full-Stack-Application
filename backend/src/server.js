@@ -1,12 +1,5 @@
 import express from "express";
-import {MongoClient, ServerApiVersion} from 'mongodb';
 import pool from './db.js';
-
-const articleInfo = [
-    {name: 'learn-node', upVotes:0, comments:[]},
-    {name: 'learn-react', upVotes:0, comments:[]},
-    {name: 'mongodb', upVotes:0, comments:[]},
-]
 
 const app = express()
 
@@ -33,7 +26,7 @@ app.post('/api/articles/:name/upvote', async function(req, res) {
   
       const output = await pool.query('select * from blogs where title = $1', [name])
       
-      res.json(output.rows[0]); // ✅ sends the updated blog as JSON
+      res.json(output.rows[0]); 
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Internal server error' });
