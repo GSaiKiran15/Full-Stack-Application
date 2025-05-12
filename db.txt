@@ -1,0 +1,1 @@
+id, title, content, author, date_published, upvotes, comments, tags

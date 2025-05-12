@@ -5,9 +5,23 @@ const app = express()
 
 app.use(express.json())
 
-app.get('/api/articles/:name', async (req, res) => {
+app.get('/api/articles', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM blogs');
+        res.json(result.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send('Server error');
+      }
+})
+
+app.get('/api/articles/:name', async (req, res) => {
+  const {name} = req.params
+  console.log(name);
+    try {
+        const result = await pool.query('SELECT * FROM blogs WHERE title = $1',[name]);
+        console.log(result.rows);
+        
         res.json(result.rows);
       } catch (err) {
         console.error(err);

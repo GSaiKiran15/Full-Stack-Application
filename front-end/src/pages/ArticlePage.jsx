@@ -1,15 +1,11 @@
-import {useParams} from 'react-router-dom'
-import articles from '../article-content'
-
+import { useLoaderData} from 'react-router-dom'
 export default function ArticlePage() {
-    const { name } = useParams();
-
-    const article = articles.find(a => a.name === name);
-
+    const {title, content, upvotes, comments} = useLoaderData()
     return (
         <>
-        <h1>{article.title}</h1>
-        {article.content.map(p => <p key={p}>{p}</p>)}
+        <h1>{title}</h1>
+        <p> This Article has {upvotes} upvotes! </p>
+        <p>{content}</p>
         </>
     );
 }
