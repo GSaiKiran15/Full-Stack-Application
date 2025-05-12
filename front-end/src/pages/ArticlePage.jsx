@@ -1,6 +1,6 @@
 import { useLoaderData} from 'react-router-dom'
 export default function ArticlePage() {
-    const {title, content, upvotes, comments} = useLoaderData()
+    const {title, content, upvotes} = useLoaderData()
     return (
         <>
         <h1>{title}</h1>
