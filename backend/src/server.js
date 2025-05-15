@@ -17,11 +17,8 @@ app.get('/api/articles', async (req, res) => {
 
 app.get('/api/articles/:name', async (req, res) => {
   const {name} = req.params
-  console.log(name);
     try {
         const result = await pool.query('SELECT * FROM blogs WHERE title = $1',[name]);
-        console.log(result.rows);
-        
         res.json(result.rows);
       } catch (err) {
         console.error(err);
@@ -31,16 +28,13 @@ app.get('/api/articles/:name', async (req, res) => {
 
 app.post('/api/articles/:name/upvote', async function(req, res) {
     const { name } = req.params;
-
     try {
       const update = await pool.query(
        'UPDATE blogs SET upvotes = upvotes + 1 WHERE title = $1',
       [name]
       );
-  
       const output = await pool.query('select * from blogs where title = $1', [name])
-      
-      res.json(output.rows[0]); 
+      res.json(output.rows[0].upvotes); 
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Internal server error' });
@@ -48,15 +42,26 @@ app.post('/api/articles/:name/upvote', async function(req, res) {
 })
 
 app.post('/api/articles/:name/comments', async (req, res) => {
-    const {name} = req.params
-    const {postedBy, text} = req.body
-    const comment = {postedBy, text}
-    const result = await pool.query("UPDATE blogs SET comments = COALESCE(comments, '{}') || $1::jsonb WHERE title = $2 RETURNING *;", [comment, name]);
-    if (result.rows.length === 0) {
-        return res.status(404).json({ error: 'Blog not found' });
-      }
-    res.json(result.rows[0]);
-})
+    const { name } = req.params; 
+    const { postedBy} = req.body;
+
+    const newCommentObject = {
+        postedBy: postedBy.nameText,
+        text: postedBy.commentText
+    };
+    
+    try {
+        const result = await pool.query(`UPDATE blogs SET comments = array_append(COALESCE(comments, ARRAY[]::jsonb[]), $1::jsonb) RETURNING *;`, [newCommentObject]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Blog not found or no update was performed.' });
+        }
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        console.error('Error adding comment:', error);
+        res.status(500).json({ error: 'Failed to add comment due to a server error.' });
+    }
+});
 
 app.listen(8000, function() {
     console.log('Server is listening on PORT 8000'); 
