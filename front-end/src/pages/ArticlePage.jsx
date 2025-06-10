@@ -32,7 +32,7 @@ export default function ArticlePage() {
         <p> This Article has {upvotes} upvotes! </p>
         <button onClick={onUpVoteClicked}>Up Vote</button>
         <AddCommentForm onAddComment={onAddComment}/>
-        <CommentsList comments={initialComments}/>
+        <CommentsList comments={comments}/>
         </>
     );
 }
@@ -40,5 +40,6 @@ export default function ArticlePage() {
 export async function loader({params}) {
       const response = await axios.get(`/api/articles/${encodeURIComponent((params.name))}`);
       const {title, content, upvotes, comments} = response.data[0]
+      console.log({title, content, upvotes, comments});
       return {title, content, upvotes, comments};
 }

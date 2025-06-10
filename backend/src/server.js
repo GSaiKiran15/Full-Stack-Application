@@ -1,5 +1,14 @@
 import express from "express";
 import pool from './db.js';
+import admin from 'firebase-admin'
+import fs from 'fs'
+
+const credentials = JSON.parse(fs.readFileSync('./key.json'));
+
+admin.initializeApp({
+  credential: admin.credential.cert(credentials)
+});
+
 
 const app = express()
 
@@ -26,8 +35,25 @@ app.get('/api/articles/:name', async (req, res) => {
       }
 })
 
+app.use(async function (req, res, next) {
+  const {authtoken} = req.headers;
+
+  if (authtoken){
+    const user = await admin.auth().verifyIdToken(authtoken);
+    req.user = user;
+  } else {
+    res.sendStatus(400);
+  }
+  next();
+})
+
 app.post('/api/articles/:name/upvote', async function(req, res) {
     const { name } = req.params;
+    const {uid} = req.user
+
+    const article = await db.collection('articles').findOne({name});
+    const upvoteIds = article.upvoteIds || []
+    const updatedArticle = await 
     try {
       const update = await pool.query(
        'UPDATE blogs SET upvotes = upvotes + 1 WHERE title = $1',
@@ -51,10 +77,11 @@ app.post('/api/articles/:name/comments', async (req, res) => {
     };
     
     try {
-        const result = await pool.query(`UPDATE blogs SET comments = array_append(COALESCE(comments, ARRAY[]::jsonb[]), $1::jsonb) RETURNING *;`, [newCommentObject]);
+        const result = await pool.query(`UPDATE blogs SET comments = array_append(COALESCE(comments, ARRAY[]::jsonb[]), $1::jsonb) WHERE title = $2 RETURNING *;`, [newCommentObject, name]);
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Blog not found or no update was performed.' });
         }
+        console.log(result.rows[0]);
         res.json(result.rows[0]);
 
     } catch (error) {

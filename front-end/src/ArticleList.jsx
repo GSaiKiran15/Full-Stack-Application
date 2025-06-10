@@ -4,6 +4,8 @@ export default function ArticlesList() {
     const {data} = useLoaderData()
     return (
         <>
+          {console.log()
+          }
           {data.map(a => (
       <Link key={a.title} to={`/articles/${a.title}`}>
         <h3>{a.title}</h3>
